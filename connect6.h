@@ -16,7 +16,10 @@ connect(char * ip, int port, char * color, char * red_stones) ;
 	Return error code on failure
 
 	String format example: A01:B01(fixed 7 bytes)
+
 	If home is "K10" or "", skip drawing and just wait
+	Black must draw_and_wait("K10", away) on first move
+	White must draw_and_waiat("", away) on first move
 ***********************/
 int
 draw_and_wait(char * home, char * away) ;

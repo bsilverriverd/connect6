@@ -6,9 +6,16 @@
 
 int sock_fd ;
 
+typedef enum _status {
+	EMPTY,
+	BLACK,
+	WHITE,
+	RED
+} status_t ;
+
 typedef struct
 _board {
-	int board[19][19] ; 
+	 board[19][19] ; 
 } board_t ;
 
 board_t board ;
@@ -36,15 +43,58 @@ connect(char * ip, int port, char * color, char * red_stones)
 		perror("connect") ;
 		exit(EXIT_FAILURE) ;
 	}
+
+	// TODO
+	// read readstones
+
+	return 1 ;
 }
 
 int
 draw_and_wait(char * home, char * away)
 {
-	if ()
+	if (strcmp(home, "") != 0 || strcmp(home, "K10") != 0) {
+		// TODO
+		// send home
+	}
+
+	// TODO
+	// read board coordinates
 }
 
 char
-get_board(char * ask) ;
+get_board(char * ask) {
+	// TODO
+	// get coordinates
+	int ver = 0 ;
+	int hor = 0 ;
+	char ver_tok = '\0' ;
+	int hor_tok = 0 ;
+	sscanf(ask, "%c %d", &ver_tok, hor_tok) ;
+
+	if ('A' <= ver_tok && ver_tok <= 'H') {
+		ver = ver_tok - 'A' ;
+	} else if ('J' <= ver_tok && ver_tok <= 'T') {
+		ver = ver_tok - 'A' - 1 ;
+	} else {
+		return 'N' ;
+	}
+
+	if (1 <= hor_tok && hor_tok <= 19) {
+		hor = hor_tok - 1 ;
+	} else {
+		return 'N' ;
+	}
+
+	char status = 'N' ;
+	switch (board.board[hor][ver]) {
+		case EMPTY: status = 'E' ; break ;
+		case BLACK: status = 'B' ; break ;
+		case WHITE: status = 'W' ; break ;
+		case RED: status = 'R' ; break ;
+		default: status = 'N' ; break ;
+	}
+	return status ;
+}
 
 #endif
