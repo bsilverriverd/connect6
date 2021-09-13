@@ -7,23 +7,34 @@ _board {
 } board_t ;
 
 /********************** 
-	return 1 on success
-	return 0 in failure
+	Return 1 on success
+	Return 0 on failure
+
+	Request TCP connection to connect6 server at ip/port as color.
+	Returns redstones via red_stones
 ***********************/
 int
-connect(char * ip, int port, char * color, char * starting_board) ;
+connect(char * ip, int port, char * color, char * red_stones) ;
 
-/*********************************
-	return 1 on success
-	return error code on failure
-**********************************/
+/**********************
+	Return 1 on success
+	Return error code on failure
+
+	String format example: A01:B01(fixed 7 bytes)
+	If home is "K10" or "", skip drawing and just wait
+***********************/
 int
 draw_and_wait(char * home, char * away) ;
 
 /***********************
-	get api maintained board
+	get status of board at given coordinate
+	Black = B
+	White = W
+	Empty = E
+	Red   = R
+	Error = N // ex) out of bounds
 ************************/
-int
-get_board(char * ask, ) ;
+char
+get_board(char * ask) ;
 
 #endif
