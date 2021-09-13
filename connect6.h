@@ -1,11 +1,6 @@
 #ifndef CONNECT6_H
 #define CONNECT6_H
 
-typedef struct
-_board {
-	int board[19][19] ; 
-} board_t ;
-
 /********************** 
 	Return 1 on success
 	Return 0 on failure

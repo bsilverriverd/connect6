@@ -4,19 +4,17 @@
 
 #include "connect6.h"
 
+int sock_fd ;
+
 typedef struct
 _board {
 	int board[19][19] ; 
 } board_t ;
 
-int sock_fd ;
+board_t board ;
 
-/********************** 
-	return 1 on success
-	return 0 in failure
-***********************/
 int
-connect(char * ip, int port, char * color, char * starting_board)
+connect(char * ip, int port, char * color, char * red_stones)
 {
 	struct sockaddr_in serv_addr ;
 
@@ -40,17 +38,13 @@ connect(char * ip, int port, char * color, char * starting_board)
 	}
 }
 
-/*********************************
-	return 1 on success
-	return error code on failure
-**********************************/
 int
 draw_and_wait(char * home, char * away)
 {
-	
+	if ()
 }
 
-int
-get_board(char * ask, ) ;
+char
+get_board(char * ask) ;
 
 #endif
