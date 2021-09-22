@@ -8,8 +8,8 @@
 	Request TCP connection to connect6 server at ip/port as color.
 	Returns redstones via red_stones
 ***********************/
-int
-connect(char * ip, int port, char * color, char * red_stones) ;
+char *
+_connect(char * ip, int port, char * color) ;
 
 /**********************
 	Return 1 on success
@@ -19,10 +19,10 @@ connect(char * ip, int port, char * color, char * red_stones) ;
 
 	If home is "K10" or "", skip drawing and just wait
 	Black must draw_and_wait("K10", away) on first move
-	White must draw_and_waiat("", away) on first move
+	White must draw_and_wait("", away) on first move
 ***********************/
-int
-draw_and_wait(char * home, char * away) ;
+char *
+draw_and_wait(char * home) ;
 
 /***********************
 	get status of board at given coordinate
