@@ -79,7 +79,7 @@ set_board(char * stones, status_t color)
 
 /******** header functions ********/
 char *
-_connect(char * ip, int port, char * color)
+lets_connect(char * ip, int port, char * color)
 {
 	if (strcmp(color, "black") == 0) {
 		player_color = BLACK ;
@@ -131,12 +131,12 @@ _connect(char * ip, int port, char * color)
 }
 
 char *
-draw_and_wait(char * home)
+draw_and_wait(char * draw)
 {
-	set_board(home, player_color) ;
+	set_board(draw, player_color) ;
 
-	if (strcmp(home, "") != 0)
-		send_msg(sock_fd, home, strlen(home)) ;
+	if (strcmp(draw, "") != 0)
+		send_msg(sock_fd, draw, strlen(draw)) ;
 
 	bufptr = recv_msg(sock_fd) ;
 	

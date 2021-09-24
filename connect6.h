@@ -9,7 +9,7 @@
 	Returns redstones on success
 ***********************/
 char *
-_connect(char * ip, int port, char * color) ;
+lets_connect(char * ip, int port, char * color) ;
 
 /**********************
 	Return 1 on success
@@ -22,7 +22,7 @@ _connect(char * ip, int port, char * color) ;
 	White must draw_and_wait("", away) on first move
 ***********************/
 char *
-draw_and_wait(char * home) ;
+draw_and_wait(char * draw) ;
 
 /***********************
 	get status of board at given coordinate

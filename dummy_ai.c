@@ -47,7 +47,7 @@ main (int argc, char * argv[])
 	int port = atoi(argv[2]) ;
 	char * color = argv[3] ;
 
-	char * redstones = _connect(ip, port, color) ;
+	char * redstones = lets_connect(ip, port, color) ;
 	printf("[main] redstone: %s\n", redstones) ;
 
 	char * first ;
@@ -69,13 +69,12 @@ main (int argc, char * argv[])
 			hor1 = (rand() % 20) + 'A' ;
 			hor1 += (hor1 == 'I') ? 1 : 0 ;
 			ver1 = (rand() % 19) + 1 ;
-		} while (!empty(hor1, ver1)) ;
-
-		do {
-			hor2 = (rand() % 20) + 'A' ;
-			hor2 += (hor2 == 'I') ? 1 : 0 ;
-			ver2 = (rand() % 19) + 1 ;
-		} while (!empty(hor2, ver2)) ;
+			do {	
+				hor2 = (rand() % 20) + 'A' ;
+				hor2 += (hor2 == 'I') ? 1 : 0 ;
+				ver2 = (rand() % 19) + 1 ;
+			} while (!(hor1 == hor2 && ver1 == ver2)) ;
+		} while (!empty(hor1, ver1) && !empty(hor2, ver2)) ;
 		
 		char * msg = generate_string(hor1, ver1, hor2, ver2) ;
 		printf("\n[main] draw: %s\n", msg) ;
