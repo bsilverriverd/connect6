@@ -116,8 +116,14 @@ _connect(char * ip, int port, char * color)
 		exit(EXIT_FAILURE) ;
 	}
 
+#ifdef DEBUG
+	fprintf(stderr, "[connect6.c: _connect] Connected!\n") ;
+#endif
 	// read readstones
 	bufptr = recv_msg(sock_fd) ;
+#ifdef DEBUG
+	fprintf(stderr, "[connect6.: _connect] bufptr:%s\n", bufptr) ;
+#endif
 	
 	set_board(bufptr, RED) ;
 	
@@ -134,6 +140,9 @@ draw_and_wait(char * home)
 
 	bufptr = recv_msg(sock_fd) ;
 	
+#ifdef DEBUG
+	fprintf(stderr, "[connect6.c: draw_and_wait] bufptr: %s\n", bufptr) ;
+#endif
 	set_board(bufptr, opponent_color) ; 
 
 	return bufptr ;

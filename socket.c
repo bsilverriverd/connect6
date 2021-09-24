@@ -39,11 +39,21 @@ recv_int (int sock_fd)
 	int len = 0 ;
 	int data = 0 ;
 	char * _data = (char *)&data ;
+	char * __data = _data ;
 
 	while (len < sizeof(int) && (r = recv(sock_fd, _data, sizeof(int) - len, 0)) > 0) {
+#ifdef DEBUG
+		fprintf(stderr, "[socket.c:recv_int] r: %d\n", r) ;
+#endif
 		_data += r ;
 		len += r ;
+#ifdef DEBUG
+		fprintf(stderr, "[socket.c:recv_int] _data: %x %x %x %x\n", __data[0], __data[1], __data[2], __data[3]) ;
+#endif	
 	}
+#ifdef DEBUG
+	fprintf(stderr, "[socket.c:recv_int] data: %d\n", data) ;	
+#endif
 
 	return data ;
 }
@@ -64,8 +74,6 @@ send_nbytes (int sock_fd, char * data, int nbytes)
 void
 recv_nbytes (int sock_fd, char * buf, int nbytes)
 {
-	memset(buf, 0, nbytes) ;
-
 	int len = 0 ;
 	int r = 0 ;
 
@@ -89,11 +97,15 @@ char *
 recv_msg (int sock_fd)
 {
 	int msglen = recv_int(sock_fd) ;
+#ifdef DEBUG
+	fprintf(stderr, "msglen: %d\n", msglen) ;
+#endif
 	if (BUFFERSIZE <= msglen) {
 		//error	
 		exit(EXIT_FAILURE) ;
 	}
 	
+	memset(buffer, '\0', BUFFERSIZE) ;
 	recv_nbytes(sock_fd, buffer, msglen) ;
 
 	return buffer ;	

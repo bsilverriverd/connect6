@@ -6,7 +6,7 @@
 	Return 0 on failure
 
 	Request TCP connection to connect6 server at ip/port as color.
-	Returns redstones via red_stones
+	Returns redstones on success
 ***********************/
 char *
 _connect(char * ip, int port, char * color) ;
