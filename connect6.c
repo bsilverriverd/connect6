@@ -25,55 +25,133 @@ status_t opponent_color ;
 /**********************************/
 
 /******* private functions ********/
-void
+
+/**************
+	returns 1 on success
+	returns 0 on failure
+**************/
+int
+set_redstones(char * redstones)
+{
+	char * stone = strtok(redstones, ":") ;
+	while (stone != 0x0) {
+		int hor = 0 ;
+		int ver = 0 ;
+		switch (stone[0]) {
+			case 'a' ... 'h' : hor = 19 - (stone[0] - 'a') - 1 ; break ;
+			case 'A' ... 'H' : hor = 19 - (stone[0] - 'A') - 1 ; break ;
+			case 'j' ... 't' : hor = 19 - (stone[0] - 'a')  ; break ;
+			case 'J' ... 'T' : hor = 19 - (stone[0] - 'A')  ; break ;
+			default : return -1 ;
+		}
+		if (strlen(stone) == 3) {
+			if (stone[1] == '0' && '1' <= stone[2] && stone[2] <= '9') {
+				ver = stone[2] - '0' - 1 ;
+			} else if (stone[1] == '1' && '0' <= stone[2] && stone[2] <= '9') {
+				ver = 10 + stone[2] - '0' - 1 ;
+			} else {
+				return -1 ;
+			}
+		} else if (strlen(stone) == 2) {
+			if ('1' <= stone[1] && stone[1] <= '9') {
+				ver = stone[1] - '0' - 1 ;
+			} else { 
+				return -1 ;
+			}
+		} else {
+			return -1 ;
+		}
+
+		if (board[ver][hor] == EMPTY) {
+			board[ver][hor] = RED ;
+		} else {
+			return -1 ;
+		}
+
+	} // while()
+	return 1 ;
+}
+
+/**************
+	returns 1 on success
+	returns 0 on white's first move
+	return -1 on failure
+**************/
+int
 set_board(char * stones, status_t color)
 {
+	if ((color == BLACK) && (strcmp(stones, "K10") == 0 || strcmp(stones, "k10") == 0)) {
+		board[9][9] = color ;
+		return 1 ;
+	}
+	if ((color == WHITE) && (strcmp(stones, "") == 0)) {
+		return 0 ;
+	}
+
 	char * _stones = strdup(stones) ;
 	if (_stones == 0x0) {
 		perror("set_board : strdup") ;
 		exit(EXIT_FAILURE) ;
 	}
 
-	char * tok = strtok(_stones, ":") ;
-	while (tok != 0x0) {
+	char * stone[2] ;
+
+	stone[0] = strtok(_stones, ":") ;
+	if (stone[0] == 0x0) {
+		send_err(sock_fd, stones, BADINPUT) ; // BADINPUT
+		return -1 ;
+	}
+	stone[1] = strtok(0x0, ":") ;
+	if (stone[1] == 0x0) {
+		send_err(sock_fd, stones, BADINPUT) ; // BADINPUT
+		return -1 ;
+	}
+	char * err = strtok(0x0, ":") ;
+	if (err != 0x0) {
+		send_err(sock_fd, stones, BADINPUT) ; // BADINPUT
+		return -1 ;
+	}
+
+	for (int i = 0; i < 2; i++) {
 		int hor = 0 ;
 		int ver = 0 ;
-		switch (tok[0]) {
-			case 'a' ... 'h' : hor = 19 - (tok[0] - 'a') - 1 ; break ;
-			case 'A' ... 'H' : hor = 19 - (tok[0] - 'A') - 1 ; break ;
-			case 'j' ... 't' : hor = 19 - (tok[0] - 'a')  ; break ;
-			case 'J' ... 'T' : hor = 19 - (tok[0] - 'A')  ; break ;
-			default : exit(EXIT_FAILURE) ;//error
+		switch (stone[i][0]) {
+			case 'a' ... 'h' : hor = 19 - (stone[i][0] - 'a') - 1 ; break ;
+			case 'A' ... 'H' : hor = 19 - (stone[i][0] - 'A') - 1 ; break ;
+			case 'j' ... 't' : hor = 19 - (stone[i][0] - 'a')  ; break ;
+			case 'J' ... 'T' : hor = 19 - (stone[i][0] - 'A')  ; break ;
+			default : send_err(sock_fd, stones, BADCOORD) ; return -1 ; // BADCOORD
 		}
-		if (strlen(tok) == 3) {
-			if (tok[1] == '0' && '1' <= tok[2] && tok[2] <= '9') {
-				ver = tok[2] - '0' - 1 ;
-			} else if (tok[1] == '1' && '0' <= tok[2] && tok[2] <= '9') {
-				ver = 10 + tok[2] - '0' - 1 ;
+		if (strlen(stone[i]) == 3) {
+			if (stone[i][1] == '0' && '1' <= stone[i][2] && stone[i][2] <= '9') {
+				ver = stone[i][2] - '0' - 1 ;
+			} else if (stone[i][1] == '1' && '0' <= stone[i][2] && stone[i][2] <= '9') {
+				ver = 10 + stone[i][2] - '0' - 1 ;
 			} else {
-				exit(EXIT_FAILURE) ;
+				send_err(sock_fd, stones, BADCOORD) ; // BADCOORD
+				return -1 ;
 			}
-		} else if (strlen(tok) == 2) {
-			if ('1' <= tok[2] && tok[2] <= '9') {
-				ver = tok[2] - '0' - 1 ;
+		} else if (strlen(stone[i]) == 2) {
+			if ('1' <= stone[i][1] && stone[i][1] <= '9') {
+				ver = stone[i][1] - '0' - 1 ;
 			} else { 
-				//error
-				exit(EXIT_FAILURE) ;
+				send_err(sock_fd, stones, BADCOORD) ; //BADCOORD
+				return -1 ;
 			}
 		} else {
-			//error
-			exit(EXIT_FAILURE) ;
+			send_err(sock_fd, stones, BADINPUT) ; // BADINPUT
+			return -1 ;
 		}
 
 		if (board[ver][hor] == EMPTY) {
 			board[ver][hor] = color ;
 		} else {
-			perror("set_board : attempted to set board on a non-empty point") ;
-			exit(EXIT_FAILURE) ;
+			send_err(sock_fd, stones, NOTEMPTY) ; // NOTEMPTY
+			return -1 ;
 		}
-		tok = strtok(0x0, ":") ;
-	} // while (tok != 0x0)
+	} // for()
 	free(_stones) ;	
+	return 1 ;
 }
 /**********************************/
 
@@ -125,7 +203,10 @@ lets_connect(char * ip, int port, char * color)
 	fprintf(stderr, "[connect6.: _connect] bufptr:%s\n", bufptr) ;
 #endif
 	
-	set_board(bufptr, RED) ;
+	if (set_redstones(bufptr) < 0) {
+		perror("bad redstones") ;
+		exit(EXIT_FAILURE) ;
+	}
 	
 	return bufptr ;
 }
@@ -133,9 +214,7 @@ lets_connect(char * ip, int port, char * color)
 char *
 draw_and_wait(char * draw)
 {
-	set_board(draw, player_color) ;
-
-	if (strcmp(draw, "") != 0)
+	if (set_board(draw, player_color) > 0)
 		send_msg(sock_fd, draw, strlen(draw)) ;
 
 	bufptr = recv_msg(sock_fd) ;
@@ -143,7 +222,9 @@ draw_and_wait(char * draw)
 #ifdef DEBUG
 	fprintf(stderr, "[connect6.c: draw_and_wait] bufptr: %s\n", bufptr) ;
 #endif
-	set_board(bufptr, opponent_color) ; 
+	if (strcmp(bufptr, "WIN") != 0 && strcmp(bufptr, "LOSE") != 0) {
+		set_board(bufptr, opponent_color) ; 
+	}
 
 	return bufptr ;
 }

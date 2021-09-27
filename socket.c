@@ -16,6 +16,14 @@
 
 /** private data structures **/
 char buffer[BUFFERSIZE] ;
+
+const char * 
+err_str[3] = {
+	"BADCOORD",
+	"NOTEMPTY",
+	"BADINPUT",
+} ;
+
 /*****************************/
 
 /***** private functions *****/
@@ -109,5 +117,13 @@ recv_msg (int sock_fd)
 	recv_nbytes(sock_fd, buffer, msglen) ;
 
 	return buffer ;	
+}
+
+void
+send_err (int sock_fd, char * err, errcode_t errcode) {
+	char msg[BUFFERSIZE] ;
+	snprintf(msg, BUFFERSIZE-1, "%s$%s", err_str[errcode], err) ;
+
+	send_msg(sock_fd, msg, strlen(msg)) ;
 }
 /****************************/
