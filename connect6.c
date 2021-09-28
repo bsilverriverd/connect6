@@ -51,10 +51,10 @@ set_redstones(char * redstones)
 		int hor = 0 ;
 		int ver = 0 ;
 		switch (stone[0]) {
-			case 'a' ... 'h' : hor = 19 - (stone[0] - 'a') - 1 ; break ;
-			case 'A' ... 'H' : hor = 19 - (stone[0] - 'A') - 1 ; break ;
-			case 'j' ... 't' : hor = 19 - (stone[0] - 'a')  ; break ;
-			case 'J' ... 'T' : hor = 19 - (stone[0] - 'A')  ; break ;
+			case 'a' ... 'h' : hor = stone[0] - 'a' ; break ;
+			case 'A' ... 'H' : hor = stone[0] - 'A' ; break ;
+			case 'j' ... 't' : hor = stone[0] - 'a' - 1 ; break ;
+			case 'J' ... 'T' : hor = stone[0] - 'A' - 1 ; break ;
 			default : return -1 ;
 		}
 		if (strlen(stone) == 3) {
@@ -134,10 +134,10 @@ set_board(char * stones, status_t color)
 		int hor = 0 ;
 		int ver = 0 ;
 		switch (stone[i][0]) {
-			case 'a' ... 'h' : hor = 19 - (stone[i][0] - 'a') - 1 ; break ;
-			case 'A' ... 'H' : hor = 19 - (stone[i][0] - 'A') - 1 ; break ;
-			case 'j' ... 't' : hor = 19 - (stone[i][0] - 'a')  ; break ;
-			case 'J' ... 'T' : hor = 19 - (stone[i][0] - 'A')  ; break ;
+			case 'a' ... 'h' : hor = stone[i][0] - 'a' ; break ;
+			case 'A' ... 'H' : hor = stone[i][0] - 'A' ; break ;
+			case 'j' ... 't' : hor = stone[i][0] - 'a' - 1 ; break ;
+			case 'J' ... 'T' : hor = stone[i][0] - 'A' - 1 ; break ;
 			default : send_err(sock_fd, stones, BADCOORD) ; return -1 ; // BADCOORD
 		}
 		if (strlen(stone[i]) == 3) {
@@ -255,10 +255,10 @@ get_board(char * ask) {
 	int hor = 0 ;
 	int ver = 0 ;
 	switch (ask[0]) {
-		case 'a' ... 'h' : hor = 19 - (ask[0] - 'a') - 1 ; break ;
-		case 'A' ... 'H' : hor = 19 - (ask[0] - 'A') - 1 ; break ;
-		case 'j' ... 't' : hor = 19 - (ask[0] - 'a') ; break ;
-		case 'J' ... 'T' : hor = 19 - (ask[0] - 'A') ; break ;
+		case 'a' ... 'h' : hor = ask[0] - 'a' ; break ;
+		case 'A' ... 'H' : hor = ask[0] - 'A' ; break ;
+		case 'j' ... 't' : hor = ask[0] - 'a' - 1 ; break ;
+		case 'J' ... 'T' : hor = ask[0] - 'A' - 1 ; break ;
 		default : return 'N' ; 
 	}
 	if (strlen(ask) == 3) {
