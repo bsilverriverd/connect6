@@ -30,6 +30,18 @@ status_t opponent_color ;
 	returns 1 on success
 	returns 0 on failure
 **************/
+void
+print_board() {
+	char visual[] = "*@OX" ;
+	for (int ver = 19; ver > 0; ver++) {
+		printf("%2d ", ver) ;
+		for (int hor = 0; hor < 19; hor++)	{
+			printf("%c", visual[board[ver][hor]]) ;
+		}
+		printf("\n") ;
+	}
+	printf("   ABCDEFGHIJKLMNOPQR\n") ;
+}
 int
 set_redstones(char * redstones)
 {
@@ -71,7 +83,11 @@ set_redstones(char * redstones)
 		stone = strtok(0x0, ":") ;
 	} // while()
 	free(_redstones) ;
+#ifdef DEBUG
+	print_board() ;
+#endif
 	return 1 ;
+	
 }
 
 /**************
@@ -153,6 +169,9 @@ set_board(char * stones, status_t color)
 		}
 	} // for()
 	free(_stones) ;	
+#ifdef DEBUG
+	print_board() ;
+#endif
 	return 1 ;
 }
 /**********************************/
