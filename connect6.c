@@ -251,8 +251,8 @@ get_board(char * ask) {
 			return 'N' ;
 		}
 	} else if (strlen(ask) == 2) {
-		if ('1' <= ask[2] && ask[2] <= '9') {
-			ver = ask[2] - '0' - 1 ;
+		if ('1' <= ask[1] && ask[1] <= '9') {
+			ver = ask[1] - '0' - 1 ;
 		} else { 
 			return 'N' ;
 		}
