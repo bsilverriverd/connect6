@@ -21,10 +21,10 @@ generate_string (char hor1, int ver1, char hor2, int ver2)
 }
 
 int
-empty(char hor, int ver)
+is_empty(char hor, int ver)
 {
 	char ask[4] ;
-	snprintf(ask, 4, "%c%d", hor, ver) ;
+	snprintf(ask, 4, "%c%02d", hor, ver) ;
 
 	char c = get_board(ask) ;
 
@@ -74,7 +74,7 @@ main (int argc, char * argv[])
 				hor2 += (hor2 == 'I') ? 1 : 0 ;
 				ver2 = (rand() % 19) + 1 ;
 			} while (hor1 == hor2 && ver1 == ver2) ;
-		} while (!empty(hor1, ver1) && !empty(hor2, ver2)) ;
+		} while (!is_empty(hor1, ver1) && !is_empty(hor2, ver2)) ;
 		
 		char * msg = generate_string(hor1, ver1, hor2, ver2) ;
 		printf("\n[main] draw: %s\n", msg) ;
