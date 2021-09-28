@@ -40,7 +40,7 @@ print_board() {
 		}
 		printf("\n") ;
 	}
-	printf("   ABCDEFGHIJKLMNOPQR\n") ;
+	printf("   ABCDEFGHJKLMNOPQRST\n") ;
 }
 int
 set_redstones(char * redstones)
