@@ -33,10 +33,10 @@ status_t opponent_color ;
 void
 print_board() {
 	char visual[] = "*@OX" ;
-	for (int ver = 19; ver > 0; ver++) {
-		printf("%2d ", ver) ;
+	for (int ver = 0; ver < 19; ver++) {
+		printf("%2d ", 18-ver) ;
 		for (int hor = 0; hor < 19; hor++)	{
-			printf("%c", visual[board[ver][hor]]) ;
+			printf("%c", visual[board[18-ver][hor]]) ;
 		}
 		printf("\n") ;
 	}
