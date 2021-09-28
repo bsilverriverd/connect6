@@ -238,8 +238,8 @@ get_board(char * ask) {
 	switch (ask[0]) {
 		case 'a' ... 'h' : hor = 19 - (ask[0] - 'a') - 1 ; break ;
 		case 'A' ... 'H' : hor = 19 - (ask[0] - 'A') - 1 ; break ;
-		case 'j' ... 't' : hor = 19 - (ask[0] - 'j') ; break ;
-		case 'J' ... 'T' : hor = 19 - (ask[0] - 'J') ; break ;
+		case 'j' ... 't' : hor = 19 - (ask[0] - 'a') ; break ;
+		case 'J' ... 'T' : hor = 19 - (ask[0] - 'A') ; break ;
 		default : return 'N' ; 
 	}
 	if (strlen(ask) == 3) {
