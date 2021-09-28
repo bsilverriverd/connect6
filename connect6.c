@@ -34,7 +34,7 @@ void
 print_board() {
 	char visual[] = "*@OX" ;
 	for (int ver = 0; ver < 19; ver++) {
-		printf("%2d ", 18-ver) ;
+		printf("%2d ", 19-ver) ;
 		for (int hor = 0; hor < 19; hor++)	{
 			printf("%c", visual[board[18-ver][hor]]) ;
 		}
