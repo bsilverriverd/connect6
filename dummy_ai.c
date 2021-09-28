@@ -15,7 +15,7 @@ generate_string (char hor1, int ver1, char hor2, int ver2)
 {
 	memset(buf, '\0', sizeof(buf)) ;
 
-	snprintf(buf, 10, "%c%d:%c%d", hor1, ver1, hor2, ver2) ;
+	snprintf(buf, 10, "%c%02d:%c%02d", hor1, ver1, hor2, ver2) ;
 
 	return buf ;
 }
@@ -73,7 +73,7 @@ main (int argc, char * argv[])
 				hor2 = (rand() % 20) + 'A' ;
 				hor2 += (hor2 == 'I') ? 1 : 0 ;
 				ver2 = (rand() % 19) + 1 ;
-			} while (!(hor1 == hor2 && ver1 == ver2)) ;
+			} while (hor1 == hor2 && ver1 == ver2) ;
 		} while (!empty(hor1, ver1) && !empty(hor2, ver2)) ;
 		
 		char * msg = generate_string(hor1, ver1, hor2, ver2) ;

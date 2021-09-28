@@ -1,14 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <arpa/inet.h>
-#include <linux/limits.h>
-#include <errno.h>
 
 #include "socket.h"
 
@@ -109,7 +102,7 @@ recv_msg (int sock_fd)
 	fprintf(stderr, "msglen: %d\n", msglen) ;
 #endif
 	if (BUFFERSIZE <= msglen) {
-		//error	
+		perror("recv_msg : Too much input") ;
 		exit(EXIT_FAILURE) ;
 	}
 	

@@ -33,7 +33,8 @@ status_t opponent_color ;
 int
 set_redstones(char * redstones)
 {
-	char * stone = strtok(redstones, ":") ;
+	char * _redstones = strdup(redstones) ;
+	char * stone = strtok(_redstones, ":") ;
 	while (stone != 0x0) {
 		int hor = 0 ;
 		int ver = 0 ;
@@ -67,8 +68,9 @@ set_redstones(char * redstones)
 		} else {
 			return -1 ;
 		}
-
+		stone = strtok(0x0, ":") ;
 	} // while()
+	free(_redstones) ;
 	return 1 ;
 }
 
