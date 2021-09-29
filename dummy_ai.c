@@ -5,8 +5,6 @@
 
 #include "connect6.h"
 
-char ver_arr[20][3] = { "0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
-						"10", "11", "12", "13", "14", "15", "16", "17", "18", "19" } ;
 char buf[10] ;
 char * wait ;
 
@@ -23,12 +21,12 @@ generate_string (char hor1, int ver1, char hor2, int ver2)
 int
 is_empty(char hor, int ver)
 {
-	char ask[4] ;
+	char ask[5] ;
 	snprintf(ask, 4, "%c%02d", hor, ver) ;
 
-	char c = get_board(ask) ;
+	char * status = get_board(ask) ;
 
-	if (c == 'E')
+	if (strcmp(status, "EMPTY") == 0)
 		return 1 ;
 	else
 		return 0 ;

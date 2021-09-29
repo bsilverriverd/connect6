@@ -22,6 +22,15 @@ status_t board[19][19] ;
 
 status_t player_color ;
 status_t opponent_color ;
+
+char *
+status_str[5] = {
+	"EMPTY",
+	"BLACK",
+	"WHITE",
+	"RED",
+	"ERROR",
+} ;
 /**********************************/
 
 /******* private functions ********/
@@ -42,52 +51,63 @@ print_board() {
 	}
 	printf("   ABCDEFGHJKLMNOPQRST\n") ;
 }
+
 int
-set_redstones(char * redstones)
+parse (char * stone, int * hor, int * ver)
+{
+	char a = '\0' ;
+	int _hor = -1 ;
+	int _ver = -1 ;
+	int n = 0 ;
+	if (sscanf(stone, "%c%2d%n", &a, &_ver, &n) != 2 || stone[n] != '\0')
+		return BADINPUT ;
+	
+	switch (a) {
+		case 'a' ... 'h' : _hor = a - 'a' ; break ;
+		case 'A' ... 'H' : _hor = a - 'A' ; break ;
+		case 'j' ... 't' : _hor = a - 'a' - 1 ; break ;
+		case 'J' ... 'T' : _hor = a - 'A' - 1 ; break ;
+		default : return BADCOORD ;
+	}
+	
+	if (0 < _ver && _ver <= 19)
+		_ver-- ;
+	else
+		return BADCOORD ;
+	
+	*hor = _hor ;
+	*ver = _ver ;
+
+	return 0 ;	
+}
+
+int
+set_redstones (char * redstones)
 {
 	char * _redstones = strdup(redstones) ;
 	char * stone = strtok(_redstones, ":") ;
 	while (stone != 0x0) {
-		int hor = 0 ;
-		int ver = 0 ;
-		switch (stone[0]) {
-			case 'a' ... 'h' : hor = stone[0] - 'a' ; break ;
-			case 'A' ... 'H' : hor = stone[0] - 'A' ; break ;
-			case 'j' ... 't' : hor = stone[0] - 'a' - 1 ; break ;
-			case 'J' ... 'T' : hor = stone[0] - 'A' - 1 ; break ;
-			default : return -1 ;
-		}
-		if (strlen(stone) == 3) {
-			if (stone[1] == '0' && '1' <= stone[2] && stone[2] <= '9') {
-				ver = stone[2] - '0' - 1 ;
-			} else if (stone[1] == '1' && '0' <= stone[2] && stone[2] <= '9') {
-				ver = 10 + stone[2] - '0' - 1 ;
-			} else {
-				return -1 ;
-			}
-		} else if (strlen(stone) == 2) {
-			if ('1' <= stone[1] && stone[1] <= '9') {
-				ver = stone[1] - '0' - 1 ;
-			} else { 
-				return -1 ;
-			}
-		} else {
-			return -1 ;
-		}
 
-		if (board[ver][hor] == EMPTY) {
-			board[ver][hor] = RED ;
-		} else {
-			return -1 ;
+		int hor = -1 ;
+		int ver = -1 ;
+		int err = parse(stone, &hor, &ver) ;
+		if (err) {
+			perror("set_redstones() : bad redstones") ;
+			exit(EXIT_FAILURE) ;
 		}
+		
+		if (board[ver][hor] == EMPTY)
+			board[ver][hor] = RED ;
+		else
+			return -1 ;
+
 		stone = strtok(0x0, ":") ;
 	} // while()
 	free(_redstones) ;
 #ifdef DEBUG
 	print_board() ;
 #endif
-	return 1 ;
-	
+	return 0 ;
 }
 
 /**************
@@ -113,7 +133,6 @@ set_board(char * stones, status_t color)
 	}
 
 	char * stone[2] ;
-
 	stone[0] = strtok(_stones, ":") ;
 	if (stone[0] == 0x0) {
 		send_err(sock_fd, stones, BADINPUT) ; // BADINPUT
@@ -130,44 +149,30 @@ set_board(char * stones, status_t color)
 		return -1 ;
 	}
 
+#ifdef DEBUG
+	fprintf(stderr, "[set_board] stone[0] %s\n", stone[0]) ;
+	fprintf(stderr, "[set_board] stone[1] %s\n", stone[1]) ;
+#endif
 	for (int i = 0; i < 2; i++) {
-		int hor = 0 ;
-		int ver = 0 ;
-		switch (stone[i][0]) {
-			case 'a' ... 'h' : hor = stone[i][0] - 'a' ; break ;
-			case 'A' ... 'H' : hor = stone[i][0] - 'A' ; break ;
-			case 'j' ... 't' : hor = stone[i][0] - 'a' - 1 ; break ;
-			case 'J' ... 'T' : hor = stone[i][0] - 'A' - 1 ; break ;
-			default : send_err(sock_fd, stones, BADCOORD) ; return -1 ; // BADCOORD
-		}
-		if (strlen(stone[i]) == 3) {
-			if (stone[i][1] == '0' && '1' <= stone[i][2] && stone[i][2] <= '9') {
-				ver = stone[i][2] - '0' - 1 ;
-			} else if (stone[i][1] == '1' && '0' <= stone[i][2] && stone[i][2] <= '9') {
-				ver = 10 + stone[i][2] - '0' - 1 ;
-			} else {
-				send_err(sock_fd, stones, BADCOORD) ; // BADCOORD
-				return -1 ;
-			}
-		} else if (strlen(stone[i]) == 2) {
-			if ('1' <= stone[i][1] && stone[i][1] <= '9') {
-				ver = stone[i][1] - '0' - 1 ;
-			} else { 
-				send_err(sock_fd, stones, BADCOORD) ; //BADCOORD
-				return -1 ;
-			}
-		} else {
-			send_err(sock_fd, stones, BADINPUT) ; // BADINPUT
+		int hor = -1 ;
+		int ver = -1 ;
+		int err = parse(stone[i], &hor, &ver) ;
+		if (err) {
+			send_err(sock_fd, stones, err) ;
 			return -1 ;
 		}
 
 		if (board[ver][hor] == EMPTY) {
 			board[ver][hor] = color ;
 		} else {
-			send_err(sock_fd, stones, NOTEMPTY) ; // NOTEMPTY
+			send_err(sock_fd, stones, NOTEMPTY) ;
 			return -1 ;
 		}
-	} // for()
+
+#ifdef DEBUG
+	fprintf(stderr, "set board[%d][%d] %s\n", ver, hor, get_board(stone[i])) ;
+#endif
+	}
 	free(_stones) ;	
 #ifdef DEBUG
 	print_board() ;
@@ -250,40 +255,23 @@ draw_and_wait(char * draw)
 	return bufptr ;
 }
 
-char
+char *
 get_board(char * ask) {
-	int hor = 0 ;
-	int ver = 0 ;
-	switch (ask[0]) {
-		case 'a' ... 'h' : hor = ask[0] - 'a' ; break ;
-		case 'A' ... 'H' : hor = ask[0] - 'A' ; break ;
-		case 'j' ... 't' : hor = ask[0] - 'a' - 1 ; break ;
-		case 'J' ... 'T' : hor = ask[0] - 'A' - 1 ; break ;
-		default : return 'N' ; 
-	}
-	if (strlen(ask) == 3) {
-		if (ask[1] == '0' && '1' <= ask[2] && ask[2] <= '9') {
-			ver = ask[2] - '0' - 1 ;
-		} else if (ask[1] == '1' && '0' <= ask[2] && ask[2] <= '9') {
-			ver = 10 + ask[2] - '0' - 1 ;
-		} else {
-			return 'N' ;
-		}
-	} else if (strlen(ask) == 2) {
-		if ('1' <= ask[1] && ask[1] <= '9') {
-			ver = ask[1] - '0' - 1 ;
-		} else { 
-			return 'N' ;
-		}
-	} else {
-		return 'N' ;
-	}
+	int hor = -1 ;
+	int ver = -1 ;
+	int err = parse(ask, &hor, &ver) ;
+	if (err)
+		return status_str[4] ;
+
+#ifdef DEBUG
+	fprintf(stderr, "get board[%d][%d] %s\n", ver, hor, status_str[board[ver][hor]]) ;
+#endif
 	switch (board[ver][hor]) {
-		case EMPTY : return 'E' ;
-		case BLACK : return 'B' ;
-		case WHITE : return 'W' ;
-		case RED : return 'R' ;
-		default : return 'N' ;
+		case EMPTY : 
+		case BLACK :
+		case WHITE :
+		case RED : return status_str[board[ver][hor]] ;
+		default : return status_str[4] ;
 	}
 }
 /**********************************/

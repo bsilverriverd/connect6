@@ -32,7 +32,7 @@ draw_and_wait(char * draw) ;
 	Red   = R
 	Error = N // ex) out of bounds
 ************************/
-char
+char *
 get_board(char * ask) ;
 
 #endif
