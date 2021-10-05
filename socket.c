@@ -7,20 +7,10 @@
 
 #define BUFFERSIZE 1024
 
-/** private data structures **/
 char buffer[BUFFERSIZE] ;
 
-const char * 
-err_str[3] = {
-	"BADCOORD",
-	"NOTEMPTY",
-	"BADINPUT",
-} ;
-
-/*****************************/
-
 /***** private functions *****/
-void
+int
 send_int (int sock_fd, int data)
 {
 	int s = 0 ;
@@ -31,6 +21,10 @@ send_int (int sock_fd, int data)
 		_data += s ;
 		len -= s ;
 	}
+	if (s < 0)
+		return 1 ;
+	else
+		return 0 ;
 }
 
 int
@@ -43,36 +37,35 @@ recv_int (int sock_fd)
 	char * __data = _data ;
 
 	while (len < sizeof(int) && (r = recv(sock_fd, _data, sizeof(int) - len, 0)) > 0) {
-#ifdef DEBUG
-		fprintf(stderr, "[socket.c:recv_int] r: %d\n", r) ;
-#endif
 		_data += r ;
 		len += r ;
-#ifdef DEBUG
-		fprintf(stderr, "[socket.c:recv_int] _data: %x %x %x %x\n", __data[0], __data[1], __data[2], __data[3]) ;
-#endif	
 	}
-#ifdef DEBUG
-	fprintf(stderr, "[socket.c:recv_int] data: %d\n", data) ;	
-#endif
 
-	return data ;
+	if (r <= 0)
+		return -1 ;
+	else
+		return data ;
 }
 
-void
-send_nbytes (int sock_fd, char * data, int nbytes)
+int
+send_nbytes (int sock_fd, const char * data, int nbytes)
 {
 	int s = 0 ;
 	int len = nbytes ;
-	char * _data = data ;
+	const char * _data = data ;
 
 	while (len > 0 && (s = send(sock_fd, _data, len, 0)) > 0) {
 		_data += s ;
 		len -= s ;
 	}
+
+	if (s < 0)
+		return 1 ;
+	else
+		return 0 ;
 }
 
-void
+int
 recv_nbytes (int sock_fd, char * buf, int nbytes)
 {
 	int len = 0 ;
@@ -82,41 +75,50 @@ recv_nbytes (int sock_fd, char * buf, int nbytes)
 		buf += r ;
 		len += r ;
 	}
+	*buf = '\0' ;
+
+	if (r <= 0)
+		return -1 ;
+	else
+		return 0 ;
 }
 /****************************/
 
 /***** header functions *****/
-void
-send_msg (int sock_fd, char * msg, int msglen)
+int
+send_msg (int sock_fd, const char * msg, int msglen)
 {
-	send_int(sock_fd, msglen) ;
+	if (send_int(sock_fd, msglen) != 0)
+		return 1 ;
 
-	send_nbytes (sock_fd, msg, msglen) ;
+	if (send_nbytes (sock_fd, msg, msglen) != 0)
+		return 1 ;
+
+	return 0 ;
 }
 
 char *
 recv_msg (int sock_fd)
 {
 	int msglen = recv_int(sock_fd) ;
-#ifdef DEBUG
-	fprintf(stderr, "msglen: %d\n", msglen) ;
-#endif
-	if (BUFFERSIZE <= msglen) {
-		perror("recv_msg : Too much input") ;
-		exit(EXIT_FAILURE) ;
-	}
+
+	if (msglen <= 0 || BUFFERSIZE <= msglen)
+		return 0x0 ;
 	
-	memset(buffer, '\0', BUFFERSIZE) ;
-	recv_nbytes(sock_fd, buffer, msglen) ;
+	if (recv_nbytes(sock_fd, buffer, msglen) < 0)
+		return 0x0 ;
 
 	return buffer ;	
 }
 
-void
-send_err (int sock_fd, char * err, errcode_t errcode) {
+int
+send_err (int sock_fd, const char * data, const char * err) {
 	char msg[BUFFERSIZE] ;
-	snprintf(msg, BUFFERSIZE-1, "%s$%s", err_str[errcode], err) ;
+	snprintf(msg, BUFFERSIZE-1, "%s$%s", err, data) ;
 
-	send_msg(sock_fd, msg, strlen(msg)) ;
+	if (send_msg(sock_fd, msg, strlen(msg)) != 0)
+		return 1 ;
+	
+	return 0 ;
 }
 /****************************/

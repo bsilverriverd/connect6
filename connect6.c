@@ -15,7 +15,7 @@ typedef enum _status {
 	EMPTY,
 	BLACK,
 	WHITE,
-	RED
+	RED,
 } status_t ;
 
 status_t board[19][19] ; 
@@ -23,36 +23,37 @@ status_t board[19][19] ;
 status_t player_color ;
 status_t opponent_color ;
 
-char *
-status_str[5] = {
-	"EMPTY",
-	"BLACK",
-	"WHITE",
-	"RED",
-	"ERROR",
+int first_turn ;
+
+typedef enum _errcode {
+	BADCOORD,
+	NOTEMPTY,
+	BADINPUT,
+	GOOD,
+} errcode_t ;
+
+const char * err_str[3] = {
+	"BADCOORD",
+	"NOTEMPTY",
+	"BADINPUT",
 } ;
 /**********************************/
 
 /******* private functions ********/
-
-/**************
-	returns 1 on success
-	returns 0 on failure
-**************/
 void
 print_board() {
 	char visual[] = "*@OX" ;
+	printf("   ABCDEFGHJKLMNOPQRST\n") ;
 	for (int ver = 19; ver > 0; ver--) {
 		printf("%2d ", ver) ;
-		for (int hor = 0; hor < 19; hor++)	{
+		for (int hor = 0; hor < 19; hor++)
 			printf("%c", visual[board[ver-1][hor]]) ;
-		}
-		printf("\n") ;
+		printf(" %d\n", ver) ;
 	}
 	printf("   ABCDEFGHJKLMNOPQRST\n") ;
 }
 
-int
+errcode_t 
 parse (char * stone, int * hor, int * ver)
 {
 	char a = '\0' ;
@@ -61,134 +62,124 @@ parse (char * stone, int * hor, int * ver)
 	int n = 0 ;
 	if (sscanf(stone, "%c%2d%n", &a, &_ver, &n) != 2 || stone[n] != '\0')
 		return BADINPUT ;
-	
-	switch (a) {
-		case 'a' ... 'h' : _hor = a - 'a' ; break ;
-		case 'A' ... 'H' : _hor = a - 'A' ; break ;
-		case 'j' ... 't' : _hor = a - 'a' - 1 ; break ;
-		case 'J' ... 'T' : _hor = a - 'A' - 1 ; break ;
-		default : return BADCOORD ;
+
+	if ('a' <= a && a <= 'h') {
+		_hor = a - 'a' ;
+	} else if ('A' <= a && a <= 'H') {
+		_hor = a - 'A' ;
+	} else if ('j' <= a && a <= 't') {
+		_hor = a - 'a' - 1 ;
+	} else if ('J' <= a && a <= 'T') {
+		_hor = a - 'A' - 1 ;
+	} else {
+		return BADCOORD ;
 	}
 	
-	if (0 < _ver && _ver <= 19)
-		_ver-- ;
-	else
+	if (0 < _ver && _ver <= 19) {
+		_ver -= 1 ;
+	} else {
 		return BADCOORD ;
+	}
 	
 	*hor = _hor ;
 	*ver = _ver ;
 
-	return 0 ;	
+	return GOOD ;	
 }
 
 int
 set_redstones (char * redstones)
 {
 	char * _redstones = strdup(redstones) ;
+	if (_redstones == 0x0) {
+		return 1 ;
+	}
 	char * stone = strtok(_redstones, ":") ;
 	while (stone != 0x0) {
 
 		int hor = -1 ;
 		int ver = -1 ;
-		int err = parse(stone, &hor, &ver) ;
-		if (err) {
-			perror("set_redstones() : bad redstones") ;
-			exit(EXIT_FAILURE) ;
+		errcode_t err = parse(stone, &hor, &ver) ;
+		if (err != GOOD) {
+			return 1 ;
 		}
 		
-		if (board[ver][hor] == EMPTY)
+		if (board[ver][hor] == EMPTY) {
 			board[ver][hor] = RED ;
-		else
-			return -1 ;
+		} else {
+			return 1 ;
+		}
 
 		stone = strtok(0x0, ":") ;
 	} // while()
 	free(_redstones) ;
-#ifdef DEBUG
+#ifdef PRINT
 	print_board() ;
 #endif
 	return 0 ;
 }
 
-/**************
-	returns 1 on success
-	returns 0 on white's first move
-	return -1 on failure
-**************/
-int
+errcode_t 
 set_board(char * stones, status_t color)
 {
 	if ((color == BLACK) && (strcmp(stones, "K10") == 0 || strcmp(stones, "k10") == 0)) {
 		board[9][9] = color ;
-		return 1 ;
+		return GOOD ;
 	}
 	if ((color == WHITE) && (strcmp(stones, "") == 0)) {
-		return 0 ;
+		return GOOD ;
 	}
 
 	char * _stones = strdup(stones) ;
 	if (_stones == 0x0) {
 		perror("set_board : strdup") ;
-		exit(EXIT_FAILURE) ;
+		return 1 ;
 	}
 
 	char * stone[2] ;
 	stone[0] = strtok(_stones, ":") ;
 	if (stone[0] == 0x0) {
-		send_err(sock_fd, stones, BADINPUT) ; // BADINPUT
-		return -1 ;
+		return BADINPUT ;
 	}
 	stone[1] = strtok(0x0, ":") ;
 	if (stone[1] == 0x0) {
-		send_err(sock_fd, stones, BADINPUT) ; // BADINPUT
-		return -1 ;
+		return BADINPUT ;
 	}
-	char * err = strtok(0x0, ":") ;
-	if (err != 0x0) {
-		send_err(sock_fd, stones, BADINPUT) ; // BADINPUT
-		return -1 ;
+	char * tok = strtok(0x0, ":") ;
+	if (tok != 0x0) {
+		return BADINPUT ;
 	}
-
-#ifdef DEBUG
-	fprintf(stderr, "[set_board] stone[0] %s\n", stone[0]) ;
-	fprintf(stderr, "[set_board] stone[1] %s\n", stone[1]) ;
-#endif
+		
 	for (int i = 0; i < 2; i++) {
 		int hor = -1 ;
 		int ver = -1 ;
 		int err = parse(stone[i], &hor, &ver) ;
-		if (err) {
-			send_err(sock_fd, stones, err) ;
-			return -1 ;
+		if (err != GOOD) {
+			return err ;
 		}
 
 		if (board[ver][hor] == EMPTY) {
 			board[ver][hor] = color ;
 		} else {
-			send_err(sock_fd, stones, NOTEMPTY) ;
-			return -1 ;
+			return NOTEMPTY ;
 		}
-
-#ifdef DEBUG
-	fprintf(stderr, "set board[%d][%d] %s\n", ver, hor, get_board(stone[i])) ;
-#endif
 	}
 	free(_stones) ;	
-#ifdef DEBUG
+#ifdef PRINT 
 	print_board() ;
 #endif
-	return 1 ;
+	return GOOD ;
 }
 /**********************************/
 
 /******** header functions ********/
 char *
-lets_connect(char * ip, int port, char * color)
+lets_connect(char * ip, int port, int color)
 {
-	if (strcmp(color, "black") == 0) {
+	if (color == 1) {
 		player_color = BLACK ;
 		opponent_color = WHITE ;
-	} else if (strcmp(color, "white") == 0) {
+	} else if (color == 2) {
 		player_color = WHITE ;
 		opponent_color = BLACK ;
 	} else {
@@ -198,6 +189,8 @@ lets_connect(char * ip, int port, char * color)
 	for (int i = 0; i < 19; i++)
 		for (int j = 0; j < 19; j++)
 			board[i][j] = EMPTY ;
+
+	first_turn = 1 ;
 
 	struct sockaddr_in serv_addr ;
 
@@ -220,34 +213,46 @@ lets_connect(char * ip, int port, char * color)
 		exit(EXIT_FAILURE) ;
 	}
 
-#ifdef DEBUG
-	fprintf(stderr, "[connect6.c: _connect] Connected!\n") ;
-#endif
-	// read readstones
 	bufptr = recv_msg(sock_fd) ;
-#ifdef DEBUG
-	fprintf(stderr, "[connect6.: _connect] bufptr:%s\n", bufptr) ;
-#endif
 	
-	if (set_redstones(bufptr) < 0) {
+	if (set_redstones(bufptr) != 0) {
 		perror("bad redstones") ;
 		exit(EXIT_FAILURE) ;
 	}
-	
+#ifdef PRINT	
+	print_board() ;
+#endif
 	return bufptr ;
 }
 
 char *
-draw_and_wait(char * draw)
+draw_and_read(char * draw)
 {
-	if (set_board(draw, player_color) > 0)
-		send_msg(sock_fd, draw, strlen(draw)) ;
+	if (first_turn) {
+		if (player_color == BLACK && strcmp(draw, "K10") == 0) {
+			if (send_msg(sock_fd, draw, strlen(draw)) != 0)
+				return 0x0 ;
+		} else if (player_color == WHITE && strcmp(draw, "") == 0) {
+			;
+		} else {
+			send_err(sock_fd, draw, err_str[BADINPUT]) ;
+		}
+		first_turn = 0 ;
+	} else {
+		errcode_t err = set_board(draw, player_color) ;
+
+		if (err != GOOD) {
+			send_err(sock_fd, draw, err_str[err]) ;
+		} else {
+			if (send_msg(sock_fd, draw, strlen(draw)) != 0)
+				return 0x0 ;
+		}
+	}
 
 	bufptr = recv_msg(sock_fd) ;
-	
-#ifdef DEBUG
-	fprintf(stderr, "[connect6.c: draw_and_wait] bufptr: %s\n", bufptr) ;
-#endif
+	if (bufptr == 0x0)
+		return 0x0 ;
+
 	if (strcmp(bufptr, "WIN") != 0 && strcmp(bufptr, "LOSE") != 0) {
 		set_board(bufptr, opponent_color) ; 
 	}
@@ -255,23 +260,20 @@ draw_and_wait(char * draw)
 	return bufptr ;
 }
 
-char *
-get_board(char * ask) {
+char
+get_board(char * position) {
 	int hor = -1 ;
 	int ver = -1 ;
-	int err = parse(ask, &hor, &ver) ;
-	if (err)
-		return status_str[4] ;
+	int err = parse(position, &hor, &ver) ;
+	if (err != GOOD)
+		return 'N' ;
 
-#ifdef DEBUG
-	fprintf(stderr, "get board[%d][%d] %s\n", ver, hor, status_str[board[ver][hor]]) ;
-#endif
 	switch (board[ver][hor]) {
-		case EMPTY : 
-		case BLACK :
-		case WHITE :
-		case RED : return status_str[board[ver][hor]] ;
-		default : return status_str[4] ;
+		case EMPTY : return 'E' ;
+		case BLACK : return 'B' ;
+		case WHITE : return 'W' ;
+		case RED : return 'R' ; 
+		default : return 'N' ;
 	}
 }
 /**********************************/

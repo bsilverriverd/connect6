@@ -1,6 +1,3 @@
-#ifndef CONNECT6_H
-#define CONNECT6_H
-
 /********************** 
 	Return 1 on success
 	Return 0 on failure
@@ -9,7 +6,7 @@
 	Returns redstones on success
 ***********************/
 char *
-lets_connect(char * ip, int port, char * color) ;
+lets_connect(char * ip, int port, int color) ;
 
 /**********************
 	Return 1 on success
@@ -22,7 +19,7 @@ lets_connect(char * ip, int port, char * color) ;
 	White must draw_and_wait("", away) on first move
 ***********************/
 char *
-draw_and_wait(char * draw) ;
+draw_and_read(char * draw) ;
 
 /***********************
 	get status of board at given coordinate
@@ -32,7 +29,5 @@ draw_and_wait(char * draw) ;
 	Red   = R
 	Error = N // ex) out of bounds
 ************************/
-char *
-get_board(char * ask) ;
-
-#endif
+char
+get_board(char * position) ;
